@@ -186,11 +186,12 @@ class Meeting {
     this.raisedHands.delete(socketId);
     
     // Emit event for activity tracking
-    socket.emit('participant-joined-meeting', {
-      meetingId: meetingId,
-      meetingName: meeting.name,
-      userId: socket.userId || socket.id, // Use actual user ID if available
-      isHost: false
+    io.emit('participant-left-meeting', {
+      meetingId: this.meetingId,
+      meetingName: this.meetingName,
+      userId: participant.userId,
+      finalMeetingName: this.meetingName,
+      leaveTime: new Date().toISOString()
     });
     this.connectionAttempts.delete(socketId);
     this.connectionStates.delete(socketId);
