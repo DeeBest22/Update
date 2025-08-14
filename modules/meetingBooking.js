@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 import { User, createEmailTransport, getUserName, getUserProfilePicture, validateEmail, sendMockVerificationEmail } from './auth.js';
 
-import Meeting from './meetingRetrieve.js';
-
+import Meeting from './meetingRetrieve.js'; 
 // Authentication middleware
 function requireAuth(req, res, next) {
   if (!req.session.userId && !req.user) {
@@ -212,26 +211,23 @@ export function setupMeetingBooking(app, io) {
         participants: meeting.participants.length + 1
       });
 
-      // Store in localStorage flag for real-time updates
-      const meetingData = {
-        id: meeting._id,
-        title: meeting.title,
-        description: meeting.description,
-        date: meeting.date,
-        time: meeting.time,
-        duration: meeting.duration,
-        scheduler: {
-          email: meeting.schedulerEmail,
-          name: await getUserName(meeting.schedulerEmail),
-          profilePicture: await getUserProfilePicture(meeting.schedulerEmail)
-        },
-        participants: meeting.participants,
-        createdAt: meeting.createdAt
-      };
-
       // Emit real-time notification
       io.emit('meeting-scheduled', {
-        meeting: meetingData
+        meeting: {
+          id: meeting._id,
+          title: meeting.title,
+          description: meeting.description,
+          date: meeting.date,
+          time: meeting.time,
+          duration: meeting.duration,
+          scheduler: {
+            email: meeting.schedulerEmail,
+            name: await getUserName(meeting.schedulerEmail),
+            profilePicture: await getUserProfilePicture(meeting.schedulerEmail)
+          },
+          participants: meeting.participants,
+          createdAt: meeting.createdAt
+        }
       });
 
       // Send email notifications
