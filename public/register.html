@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Video Call App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #3b82f6;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f1f5f9;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            background: rgba(51, 65, 85, 0.8);
+            color: #f1f5f9;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-google {
+            background: #ffffff;
+            color: #1f2937;
+            border: 2px solid rgba(71, 85, 105, 0.2);
+        }
+
+        .btn-google:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDEyVjE0LjI2SDE3LjkyQzE3LjY2IDE1LjYgMTYuOTggMTYuODEgMTUuOTIgMTcuNjFWMjAuNzNIMTkuMzhDMjEuNTEgMTguODMgMjIuNTYgMTUuNzcgMjIuNTYgMTIuMjVaIiBmaWxsPSIjNDI4NUY0Ii8+CjxwYXRoIGQ9Ik0xMiAyMy43NkMxNS4yNCAyMy43NiAxNy45MyAyMi42NCAxOS4zOCAyMC43M0wxNS45MiAxNy42MUMxNC45MiAxOC4zIDEzLjU2IDE4LjcxIDEyIDE4LjcxQzguODkgMTguNzEgNi4yNiAxNi44MiA1LjQgMTQuMDJIMi44MlYxNy4yOUM0LjI2IDIwLjE0IDcuODggMjMuNzYgMTIgMjMuNzZaIiBmaWxsPSIjMzRBODUzIi8+CjxwYXRoIGQ9Ik01LjQgMTQuMDJDNS4xNyAxMy4zIDUuMDQgMTIuNTMgNS4wNCAxMS43NkM1LjA0IDEwLjk5IDUuMTcgMTAuMjIgNS40IDkuNVY2LjIySDIuODJDMi4wNyA3LjY5IDEuNjQgOS4zOCAxLjY0IDExLjc2QzEuNjQgMTQuMTQgMi4wNyAxNS44MyAyLjgyIDE3LjNMNS40IDE0LjAyWiIgZmlsbD0iI0ZCQkMwNSIvPgo8cGF0aCBkPSJNMTIgNC45NEMxMy43NSA0Ljk0IDE1LjMzIDUuNiAxNi41NiA2Ljc5TDE5LjU5IDMuNzZDMTcuOTIgMi4yIDEzLjEzIDEuODEgMTIgNC45NEw5LjcxIDEuMDJDNy40NCAxLjU3IDUuNTUgMi44OCA0LjI4IDQuODFMNi43MSA3LjQzQzcuMzMgNS43NCA5LjMzIDQuOTQgMTIgNC45NFoiIGZpbGw9IiNFQTQzMzUiLz4KPC9zdmc+');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(71, 85, 105, 0.5);
+        }
+
+        .divider span {
+            padding: 0 16px;
+        }
+
+        .error-message, .success-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-top: 2px solid #94a3b8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auth-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-video"></i>
+        </div>
+        <h1>Create Account</h1>
+        <p class="subtitle">Join our video calling platform</p>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Google Sign-Up Button -->
+        <a href="/auth/google" class="btn btn-google" id="googleSignUpBtn">
+            <div class="google-icon"></div>
+            Continue with Google
+        </a>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <!-- Regular Registration Form -->
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" placeholder="Doe" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="john@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="registerBtn">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Creating account...</span>
+        </div>
+
+        <p>Already have an account? <a href="/login" class="auth-link">Sign in</a></p>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Check for URL parameters (OAuth errors)
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            let errorMsg = '';
+            switch (error) {
+                case 'oauth_cancelled':
+                    errorMsg = 'Google sign-up was cancelled';
+                    break;
+                case 'oauth_failed':
+                    errorMsg = 'Google sign-up failed. Please try again.';
+                    break;
+                case 'no_code':
+                    errorMsg = 'Google sign-up error. Please try again.';
+                    break;
+                default:
+                    errorMsg = 'An error occurred during sign-up';
+            }
+            showError(errorMsg);
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show = true) {
+            loading.classList.toggle('show', show);
+            registerBtn.disabled = show;
+            googleSignUpBtn.style.pointerEvents = show ? 'none' : 'auto';
+            googleSignUpBtn.style.opacity = show ? '0.5' : '1';
+        }
+
+        // Form validation
+        function validateForm() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!firstName || !lastName || !email || !password) {
+                showError('Please fill in all fields');
+                return false;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Regular registration form submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ firstName, lastName, email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Account created successfully! Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError(error.message);
+                showLoading(false);
+            }
+        });
+
+        // Google Sign-Up button click handler
+        googleSignUpBtn.addEventListener('click', (e) => {
+            showLoading(true);
+            // The href will handle the navigation
+        });
+
+        // Real-time password validation
+        document.getElementById('confirmPassword').addEventListener('input', (e) => {
+            const password = document.getElementById('password').value;
+            const confirmPassword = e.target.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                e.target.setCustomValidity('Passwords do not match');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+
+        // Auto-focus first name input
+        document.getElementById('firstName').focus();
+    </script>
+</body>
+</html>

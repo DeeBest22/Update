@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Video Call App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 48px;
+            color: #667eea;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .email-providers {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .email-providers h3 {
+            color: #1e293b;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .provider-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .provider-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .provider-icon i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        .provider-icon.gmail i { color: #ea4335; }
+        .provider-icon.yahoo i { color: #7b0099; }
+        .provider-icon.outlook i { color: #0078d4; }
+        .provider-icon.icloud i { color: #007aff; }
+        .provider-icon.other i { color: #10b981; }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        .step.completed {
+            background: #10b981;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            color: #374151;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .google-btn:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDEyVjE0LjI2SDE3LjkyQzE3LjY2IDE1LjYgMTYuOTIgMTYuNzQgMTUuODQgMTcuNVYyMC41NkgxOS40QzIxLjM2IDE4Ljc5IDIyLjU2IDE1Ljc4IDIyLjU2IDEyLjI1WiIgZmlsbD0iIzQyODVGNCIvPgo8cGF0aCBkPSJNMTIgMjMuMDRDMTUuMjQgMjMuMDQgMTcuOTYgMjEuOTQgMTkuNCAyMC41NkwxNS44NCAxNy41QzE0Ljc2IDE4LjE5IDEzLjM4IDE4LjYyIDEyIDE4LjYyQzguODggMTguNjIgNi4yMiAxNi44NSA1LjI2IDE0LjI5SDEuNTZWMTcuMzhDMi45NiAyMC4xNCA3LjE2IDIzLjA0IDEyIDIzLjA0WiIgZmlsbD0iIzM0QTg1MyIvPgo8cGF0aCBkPSJNNS4yNiAxNC4yOUM1LjAyIDEzLjYgNC44OCAxMi44MyA0Ljg4IDEyUzUuMDIgMTAuNCA1LjI2IDkuNzFWNi42MkgxLjU2QzAuNjggOC4zNyAwLjY4IDE1LjYzIDEuNTYgMTcuMzhMNS4yNiAxNC4yOVoiIGZpbGw9IiNGQkJDMDQiLz4KPHBhdGggZD0iTTEyIDUuMzhDMTMuNjIgNS4zOCAxNS4wNiA1Ljk4IDE2LjIgNy4wOUwyMC4xOCAzLjEyQzE3Ljk2IDEuMDcgMTUuMjQgMCAxMiAwQzcuMTYgMCAyLjk2IDIuOSAxLjU2IDUuNjJMNS4yNiA4LjcxQzYuMjIgNi4xNSA4Ljg4IDUuMzggMTIgNS4zOFoiIGZpbGw9IiNFQTQzMzUiLz4KPC9zdmc+') no-repeat center;
+            background-size: contain;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error-message, .success-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .verification-info {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .verification-info p {
+            margin: 4px 0;
+            color: #64748b;
+        }
+
+        .verification-info .email {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 16px;
+        }
+
+        .verification-input {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 8px;
+            font-family: monospace;
+        }
+
+        .resend-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .resend-link:hover {
+            color: #5a67d8;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading span {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .auth-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        #authLink {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+
+        .registration-section h2 {
+            text-align: center;
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .provider-icons {
+                gap: 10px;
+            }
+            
+            .provider-icon {
+                font-size: 10px;
+            }
+            
+            .provider-icon i {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" id="backBtn" style="display: none;">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <div class="logo">
+            <i class="fas fa-video"></i>
+        </div>
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Sign in with any email address</p>
+
+        <!-- Email Provider Support Info -->
+        <div class="email-providers">
+            <h3>Supported Email Providers</h3>
+            <div class="provider-icons">
+                <div class="provider-icon gmail">
+                    <i class="fab fa-google"></i>
+                    <span>Gmail</span>
+                </div>
+                <div class="provider-icon yahoo">
+                    <i class="fab fa-yahoo"></i>
+                    <span>Yahoo</span>
+                </div>
+                <div class="provider-icon outlook">
+                    <i class="fab fa-microsoft"></i>
+                    <span>Outlook</span>
+                </div>
+                <div class="provider-icon icloud">
+                    <i class="fab fa-apple"></i>
+                    <span>iCloud</span>
+                </div>
+                <div class="provider-icon other">
+                    <i class="fas fa-envelope"></i>
+                    <span>& More</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step active" id="step1"></div>
+            <div class="step" id="step2"></div>
+            <div class="step" id="step3"></div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Google OAuth Section -->
+        <div class="oauth-section">
+            <a href="/auth/google" class="google-btn">
+                <div class="google-icon"></div>
+                Continue with Google
+            </a>
+        </div>
+
+        <div class="divider">
+            <span>or continue with any email</span>
+        </div>
+
+        <!-- Step 1: Email Input -->
+        <div class="form-section" id="emailSection">
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email (Gmail, Yahoo, Outlook, etc.)" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="sendCodeBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Verification Code
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="usePasswordBtn">
+                <i class="fas fa-key"></i>
+                Use Password Instead
+            </button>
+        </div>
+
+        <!-- Step 2: Verification Code -->
+        <div class="form-section hidden" id="verificationSection">
+            <div class="verification-info">
+                <p>We've sent a 6-digit code to</p>
+                <p class="email" id="verificationEmail"></p>
+                <p id="providerInfo" style="font-size: 12px; color: #94a3b8; margin-top: 8px;"></p>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Check your inbox and spam folder</p>
+            </div>
+
+            <form id="verificationForm">
+                <div class="form-group">
+                    <label for="verificationCode">Verification Code</label>
+                    <input type="text" id="verificationCode" class="verification-input" placeholder="000000" maxlength="6" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="verifyBtn">
+                    <i class="fas fa-check"></i>
+                    Verify & Sign In
+                </button>
+            </form>
+
+            <div class="resend-link" id="resendCode">
+                Didn't receive the code? Resend
+            </div>
+        </div>
+
+        <!-- Step 3: Registration (for new users) -->
+        <div class="form-section hidden" id="registrationSection">
+            <div class="registration-section">
+                <h2>Complete Your Profile</h2>
+                <p style="text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 14px;">
+                    Just a few more details to get started
+                </p>
+
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" placeholder="Enter your first name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Enter your last name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">Password (Optional)</label>
+                        <input type="password" id="newPassword" placeholder="Create a password for faster login">
+                        <small style="color: #94a3b8; font-size: 12px; margin-top: 4px; display: block;">
+                            Leave blank to always use email verification
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="completeBtn">
+                        <i class="fas fa-user-check"></i>
+                        Complete Registration
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Login Section (Alternative) -->
+        <div class="form-section hidden" id="passwordSection">
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="passwordLoginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span id="loadingText">Processing...</span>
+        </div>
+
+        <p id="authLink">Don't have an account? <a href="/register" class="auth-link">Sign up</a></p>
+    </div>
+
+    <script>
+        // DOM elements
+        const emailSection = document.getElementById('emailSection');
+        const verificationSection = document.getElementById('verificationSection');
+        const registrationSection = document.getElementById('registrationSection');
+        const passwordSection = document.getElementById('passwordSection');
+        
+        const emailForm = document.getElementById('emailForm');
+        const verificationForm = document.getElementById('verificationForm');
+        const registrationForm = document.getElementById('registrationForm');
+        const passwordForm = document.getElementById('passwordForm');
+        
+        const backBtn = document.getElementById('backBtn');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const providerInfo = document.getElementById('providerInfo');
+        
+        const steps = {
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3')
+        };
+
+        let currentStep = 1;
+        let userEmail = '';
+        let tempUserId = '';
+
+        // Email provider detection
+        const detectEmailProvider = (email) => {
+            const domain = email.split('@')[1]?.toLowerCase();
+            
+            if (domain?.includes('gmail')) return { name: 'Gmail', icon: 'fab fa-google' };
+            if (domain?.includes('yahoo')) return { name: 'Yahoo', icon: 'fab fa-yahoo' };
+            if (domain?.includes('outlook') || domain?.includes('hotmail') || domain?.includes('live')) return { name: 'Outlook', icon: 'fab fa-microsoft' };
+            if (domain?.includes('icloud') || domain?.includes('me.com')) return { name: 'iCloud', icon: 'fab fa-apple' };
+            
+            return { name: 'Email Provider', icon: 'fas fa-envelope' };
+        };
+
+        // Utility functions
+        function showSection(section) {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.add('hidden'));
+            section.classList.remove('hidden');
+        }
+
+        function updateSteps(step) {
+            Object.values(steps).forEach((s, index) => {
+                s.classList.remove('active', 'completed');
+                if (index + 1 < step) s.classList.add('completed');
+                else if (index + 1 === step) s.classList.add('active');
+            });
+            currentStep = step;
+            backBtn.style.display = step > 1 ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function showLoading(show = true, text = 'Processing...') {
+            loading.classList.toggle('show', show);
+            loadingText.textContent = text;
+            
+            // Disable all buttons
+            document.querySelectorAll('button[type="submit"]').forEach(btn => {
+                btn.disabled = show;
+            });
+        }
+
+        // Step 1: Send verification code
+        emailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                showError('Please enter your email address');
+                return;
+            }
+
+            const provider = detectEmailProvider(email);
+            showLoading(true, `Sending code to your ${provider.name} account...`);
+
+            try {
+                const response = await fetch('/api/login/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    userEmail = email;
+                    document.getElementById('verificationEmail').textContent = email;
+                    
+                    // Update provider info
+                    providerInfo.innerHTML = `<i class="${provider.icon}"></i> Code sent to your ${provider.name} account`;
+                    
+                    showSection(verificationSection);
+                    updateSteps(2);
+                    
+                    if (data.mode === 'mock' || data.mode === 'mock-fallback') {
+                        showSuccess(`Development mode: Check server console for verification code`);
+                    } else {
+                        showSuccess(`Verification code sent to your ${provider.name} email!`);
+                    }
+                    
+                    document.getElementById('verificationCode').focus();
+                } else {
+                    throw new Error(data.error || 'Failed to send verification code');
+                }
+            } catch (error) {
+                console.error('Send code error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Step 2: Verify code
+        verificationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const code = document.getElementById('verificationCode').value.trim();
+            if (!code || code.length !== 6) {
+                showError('Please enter the 6-digit verification code');
+                return;
+            }
+
+            showLoading(true, 'Verifying code...');
+
+            try {
+                const response = await fetch('/api/login/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, code })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.needsRegistration) {
+                        tempUserId = data.tempUserId;
+                        showSection(registrationSection);
+                        updateSteps(3);
+                        showSuccess('Email verified! Please complete your profile.');
+                        document.getElementById('firstName').focus();
+                    } else {
+                        showSuccess('Login successful! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1000);
+                    }
+                } else {
+                    throw new Error(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                console.error('Verify code error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Step 3: Complete registration
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const password = document.getElementById('newPassword').value;
+
+            if (!firstName || !lastName) {
+                showError('Please enter your first and last name');
+                return;
+            }
+
+            showLoading(true, 'Completing registration...');
+
+            try {
+                const response = await fetch('/api/complete-registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        tempUserId, 
+                        firstName, 
+                        lastName, 
+                        password: password || undefined 
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Registration completed! Welcome!');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Complete registration error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Password login form
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            showLoading(true, 'Signing in...');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Password login error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Switch to password login
+        document.getElementById('usePasswordBtn').addEventListener('click', () => {
+            showSection(passwordSection);
+            updateSteps(1);
+            document.getElementById('loginEmail').focus();
+        });
+
+        // Resend verification code
+        document.getElementById('resendCode').addEventListener('click', async () => {
+            const provider = detectEmailProvider(userEmail);
+            showLoading(true, 'Resending code...');
+            
+            try {
+                const response = await fetch('/api/login/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.mode === 'mock' || data.mode === 'mock-fallback') {
+                        showSuccess('New code sent! Check server console.');
+                    } else {
+                        showSuccess(`New verification code sent to your ${provider.name} email!`);
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to resend code');
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Back button functionality
+        backBtn.addEventListener('click', () => {
+            if (currentStep === 2) {
+                showSection(emailSection);
+                updateSteps(1);
+            } else if (currentStep === 3) {
+                showSection(verificationSection);
+                updateSteps(2);
+            }
+        });
+
+        // Auto-format verification code input
+        document.getElementById('verificationCode').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Auto-focus email input on load
+        document.getElementById('email').focus();
+
+        // Handle Enter key in verification code input
+        document.getElementById('verificationCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.length === 6) {
+                verificationForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Real-time email provider detection
+        document.getElementById('email').addEventListener('input', (e) => {
+            const email = e.target.value;
+            if (email.includes('@')) {
+                const provider = detectEmailProvider(email);
+                // Could add visual feedback here if desired
+            }
+        });
+    </script>
+</body>
+</html>

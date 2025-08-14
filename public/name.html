@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Meeting</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Keep existing styles and add enhanced styling */
+        .conference-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .meeting-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+        
+        .dialog-heading {
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .dismiss-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .dismiss-button:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .field-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .field-wrapper {
+            position: relative;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .text-input:focus + .field-label,
+        .text-input:not(:placeholder-shown) + .field-label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: #3b82f6;
+            background: white;
+            padding: 0 0.5rem;
+        }
+        
+        .field-label {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            color: #6b7280;
+            transition: all 0.2s;
+            pointer-events: none;
+            transform-origin: left top;
+        }
+        
+        .email-field-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .email-suggestions {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .participant-add-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .participant-add-btn:hover {
+            background: #2563eb;
+        }
+        
+        .attendees-section {
+            margin-top: 1rem;
+        }
+        
+        .participants-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .participant-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            min-height: 2rem;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #f9fafb;
+        }
+        
+        .controls-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .control-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dismiss-control {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .dismiss-control:hover {
+            background: #e5e7eb;
+        }
+        
+        .start-meeting-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+        }
+        
+        .start-meeting-btn:hover {
+            background: #059669;
+        }
+        
+        .start-meeting-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .participant-tag {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .remove-participant {
+            background: none;
+            border: none;
+            color: currentColor;
+            cursor: pointer;
+            padding: 0.125rem;
+            border-radius: 2px;
+        }
+        
+        .remove-participant:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="conference-backdrop" id="dialogBackdrop">
+        <div class="meeting-wrapper">
+            <!-- Modal Header -->
+            <div class="dialog-header">
+                <h2 class="dialog-heading">Create Meeting</h2>
+                <button class="dismiss-button" id="dismissDialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="conferenceForm">
+                <!-- Meeting Title Input -->
+                <div class="field-group">
+                    <div class="field-wrapper">
+                        <input 
+                            type="text" 
+                            class="text-input" 
+                            id="conferenceTitle" 
+                            placeholder=" "
+                            autocomplete="off"
+                            maxlength="100"
+                            required
+                        >
+                        <label class="field-label" for="conferenceTitle">Meeting Title</label>
+                    </div>
+                    <div class="error-message" id="titleError"></div>
+                </div>
+
+                <!-- Email Invitation Input -->
+                <div class="field-group">
+                    <div class="field-wrapper">
+                        <div class="email-field-wrapper">
+                            <input 
+                                type="email" 
+                                class="text-input" 
+                                id="contactInput" 
+                                placeholder=" "
+                                autocomplete="off"
+                            >
+                            <label class="field-label" for="contactInput">Invite Participants</label>
+                            
+                            <!-- Email Suggestions Dropdown -->
+                            <div class="email-suggestions" id="contactOptions"></div>
+                        </div>
+                        
+                        <button type="button" class="participant-add-btn" id="addContactBtn">
+                            <i class="fas fa-plus"></i>
+                            Add Participant
+                        </button>
+                    </div>
+
+                    <!-- Participants List -->
+                    <div class="attendees-section">
+                        <div class="participants-label">Invited Participants:</div>
+                        <div class="participant-tags" id="attendeeChips"></div>
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="controls-container">
+                    <button type="button" class="control-button dismiss-control" id="dismissControl">
+                        Cancel
+                    </button>
+                    <button type="submit" class="control-button start-meeting-btn" id="launchConferenceBtn">
+                        <i class="fas fa-video"></i>
+                        Start Meeting
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class MeetingCreator {
+            constructor() {
+                this.form = document.getElementById('conferenceForm');
+                this.titleInput = document.getElementById('conferenceTitle');
+                this.emailInput = document.getElementById('contactInput');
+                this.addBtn = document.getElementById('addContactBtn');
+                this.participantsContainer = document.getElementById('attendeeChips');
+                this.submitBtn = document.getElementById('launchConferenceBtn');
+                this.dismissBtn = document.getElementById('dismissDialog');
+                this.dismissControl = document.getElementById('dismissControl');
+                
+                this.participants = [];
+                this.isCreating = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.setDefaultMeetingName();
+                this.titleInput.focus();
+            }
+            
+            async setDefaultMeetingName() {
+                try {
+                    const response = await fetch('/api/user');
+                    const data = await response.json();
+                    if (data.user && data.user.name) {
+                        this.titleInput.value = `${data.user.name}'s Meeting`;
+                        this.titleInput.dispatchEvent(new Event('input'));
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    this.titleInput.value = "New Meeting";
+                    this.titleInput.dispatchEvent(new Event('input'));
+                }
+            }
+            
+            bindEvents() {
+                // Form submission
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Add participant
+                this.addBtn.addEventListener('click', () => this.addParticipant());
+                this.emailInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.addParticipant();
+                    }
+                });
+                
+                // Dismiss buttons
+                this.dismissBtn.addEventListener('click', () => this.dismiss());
+                this.dismissControl.addEventListener('click', () => this.dismiss());
+                
+                // Click outside to dismiss
+                document.getElementById('dialogBackdrop').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        this.dismiss();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.dismiss();
+                    }
+                });
+                
+                // Input validation
+                this.titleInput.addEventListener('input', () => this.validateTitle());
+                this.emailInput.addEventListener('input', () => this.validateEmail());
+            }
+            
+            validateTitle() {
+                const titleError = document.getElementById('titleError');
+                const title = this.titleInput.value.trim();
+                
+                if (!title) {
+                    this.showError(titleError, 'Meeting title is required');
+                    return false;
+                } else if (title.length > 100) {
+                    this.showError(titleError, 'Meeting title is too long (max 100 characters)');
+                    return false;
+                } else {
+                    this.hideError(titleError);
+                    return true;
+                }
+            }
+            
+            validateEmail() {
+                const emailError = document.getElementById('emailError');
+                const email = this.emailInput.value.trim();
+                
+                if (email && !this.isValidEmail(email)) {
+                    this.showError(emailError, 'Please enter a valid email address');
+                    return false;
+                } else {
+                    this.hideError(emailError);
+                    return true;
+                }
+            }
+            
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            showError(element, message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+            
+            hideError(element) {
+                element.style.display = 'none';
+            }
+            
+            addParticipant() {
+                const email = this.emailInput.value.trim();
+                
+                if (!email) {
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                if (!this.isValidEmail(email)) {
+                    this.showError(document.getElementById('emailError'), 'Please enter a valid email address');
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                if (this.participants.includes(email)) {
+                    this.showError(document.getElementById('emailError'), 'This participant is already added');
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                this.participants.push(email);
+                this.renderParticipants();
+                this.emailInput.value = '';
+                this.hideError(document.getElementById('emailError'));
+                this.emailInput.focus();
+            }
+            
+            removeParticipant(email) {
+                this.participants = this.participants.filter(p => p !== email);
+                this.renderParticipants();
+            }
+            
+            renderParticipants() {
+                if (this.participants.length === 0) {
+                    this.participantsContainer.innerHTML = '<span style="color: #6b7280; font-style: italic;">No participants added yet</span>';
+                    return;
+                }
+                
+                const html = this.participants.map(email => `
+                    <div class="participant-tag">
+                        ${this.getEmailName(email)}
+                        <button type="button" class="remove-participant" onclick="meetingCreator.removeParticipant('${email}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                this.participantsContainer.innerHTML = html;
+            }
+            
+            getEmailName(email) {
+                return email.split('@')[0];
+            }
+            
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                if (this.isCreating) return;
+                
+                // Validate form
+                const isTitleValid = this.validateTitle();
+                const isEmailValid = this.validateEmail();
+                
+                if (!isTitleValid || !isEmailValid) {
+                    return;
+                }
+                
+                const meetingTitle = this.titleInput.value.trim();
+                
+                if (!meetingTitle) {
+                    this.showError(document.getElementById('titleError'), 'Meeting title is required');
+                    this.titleInput.focus();
+                    return;
+                }
+                
+                this.isCreating = true;
+                this.updateSubmitButton(true);
+                
+                try {
+                    // Create meeting
+                    const response = await fetch('/api/create-meeting', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            meetingName: meetingTitle,
+                            participants: this.participants
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to create meeting');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Store meeting creation info in sessionStorage for auto video stop
+                    sessionStorage.setItem('autoStopVideo', 'true');
+                    sessionStorage.setItem('fromCreateForm', 'true');
+                    
+                    // Redirect to host page with meeting name
+                    const hostUrl = `/host/${data.meetingId}?name=${encodeURIComponent(meetingTitle)}`;
+                    window.location.href = hostUrl;
+                    
+                } catch (error) {
+                    console.error('Error creating meeting:', error);
+                    this.showError(document.getElementById('titleError'), 'Failed to create meeting. Please try again.');
+                    this.isCreating = false;
+                    this.updateSubmitButton(false);
+                }
+            }
+            
+            updateSubmitButton(loading) {
+                if (loading) {
+                    this.submitBtn.disabled = true;
+                    this.submitBtn.innerHTML = `
+                        <div class="loading-spinner"></div>
+                        Creating Meeting...
+                    `;
+                } else {
+                    this.submitBtn.disabled = false;
+                    this.submitBtn.innerHTML = `
+                        <i class="fas fa-video"></i>
+                        Start Meeting
+                    `;
+                }
+            }
+            
+            dismiss() {
+                if (this.isCreating) return;
+                
+                // Navigate back to dashboard or previous page
+                if (document.referrer && document.referrer !== window.location.href) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        let meetingCreator;
+        document.addEventListener('DOMContentLoaded', () => {
+            meetingCreator = new MeetingCreator();
+        });
+        
+        // Make meetingCreator globally accessible for onclick handlers
+        window.meetingCreator = meetingCreator;
+    </script>
+</body>
+</html>
