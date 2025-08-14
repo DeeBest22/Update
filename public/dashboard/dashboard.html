@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvoSpace  - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/export-style.js" defer></script>
+    <script src="js/participantNumber.js" defer></script>
+
+    <link rel="stylesheet" href="css/export-style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="js/dashboard.js" defer></script>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="js/modalPopUp.js"></script>
+    <link rel="stylesheet" href="css/modalPopUp.css">
+    <link rel="stylesheet" href="css/shareScreenPopup.css">
+    <script src="js/upcomingMeetings.js"></script>
+    <script src="js/screenSharePopUp.js" defer></script>
+    <script src="js/audioModalPopup.js" defer></script>
+    <link rel="stylesheet" href="css/audioModalPopup.css">
+    <script src="js/meetingStats.js"></script>
+     <script src="/socket.io/socket.io.js"></script>
+
+
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <span class="logo-text">ConvoSpace </span>
+                </div>
+                
+                <div class="header-center">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="Search calls, contacts, or meetings..." class="search-input">
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="action-btn notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="user-menu" id="userMenu">
+                        <img src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop" alt="User Avatar" class="user-avatar" id="userAvatar">
+                        <div class="user-info" id="userInfo">
+                            <span class="user-name" id="userName">Loading...</span>
+                            <span class="user-status">
+                                <span class="status-indicator online"></span>
+                                <span id="userEmail">Loading...</span>
+                            </span>
+                        </div>
+                        <i class="fas fa-chevron-down dropdown-arrow" id="dropdownArrow"></i>
+                        
+                        <!-- User Dropdown Menu -->
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-header">
+                                <img src="" alt="Profile" class="dropdown-avatar" id="dropdownAvatar">
+                                <div class="dropdown-user-info">
+                                    <span class="dropdown-name" id="dropdownName">Loading...</span>
+                                    <span class="dropdown-email" id="dropdownEmail">Loading...</span>
+                                    <span class="dropdown-provider" id="dropdownProvider">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span id="authProvider">Local</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-menu">
+                                <a href="#" class="dropdown-item" id="profileSettings">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Profile Settings</span>
+                                </a>
+                                <a href="#" class="dropdown-item" id="accountSettings">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Account Settings</span>
+                                </a>
+                                <a href="#" class="dropdown-item" id="privacySettings">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Privacy & Security</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item" id="helpSupport">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>Help & Support</span>
+                                </a>
+                                <a href="#" class="dropdown-item logout-item" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-section="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="calls">
+                        <i class="fas fa-video"></i>
+                        <span>Video Calls</span>
+                    </a>
+               
+                    <a href="#" class="nav-item" data-section="meetings">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Meetings</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="history">
+                        <i class="fas fa-history"></i>
+                        <span>Call History</span>
+                    </a>
+                
+                </nav>
+                
+                <div class="sidebar-bottom">
+                    <div class="upgrade-card">
+                        <div class="upgrade-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h4>Upgrade to </h4>
+                        <p>Unlock unlimited calls and advanced features</p>
+                        <button class="upgrade-btn">Upgrade Now</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="content-section active">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h1>Dashboard</h1>
+                            <p id="welcomeMessage">Welcome back! Here's your call activity overview.</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" id="xp98stats-export-trigger">
+                                <i class="fas fa-arrow-down"></i>
+                                Export Report
+                            </button>
+                            <button class="btn btn-primary" onclick="openModalPopMeeting()">
+                                <i class="fas fa-video"></i>
+                                Start Call
+                            </button>
+                        </div>
+                    </div>
+                        <!-- Export Modal -->
+
+
+ 
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number"></div>
+                                <div class="stat-label">Total Calls</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                   
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number"></div>
+                                <div class="stat-label">Call Duration</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                   
+                                </div>
+                            </div>
+                        </div>
+               
+                          
+                        
+                        <div class="stat-card info">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-content" >
+                                <div class="stat-number" id="meetingScheduledNo"></div>
+                                <div class="stat-label">Meetings Scheduled</div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3>Quick Actions</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn primary" onclick="openModalPopMeeting()">
+                                        <div class="action-icon">
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                        <div class="action-content">
+                                            <span class="action-title">Start Instant Call</span>
+                                            <span class="action-desc">Begin a video call immediately</span>
+                                        </div>
+                                    </button>
+                                    
+                        <button class="quick-action-btn secondary" onclick="window.open('/schedule', '_blank')">
+  <div class="action-icon">
+    <i class="fas fa-calendar-plus"></i>
+  </div>
+  <div class="action-content">
+    <span class="action-title">Schedule Meeting</span>
+    <span class="action-desc">Plan a future meeting</span>
+  </div>
+</button>
+
+
+                                    
+                                    <button class="quick-action-btn tertiary" id="shareScreenBtn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-share-alt"></i>
+                                        </div>
+                                        <div class="action-content">
+                                            <span class="action-title">Share Screen</span>
+                                            <span class="action-desc">Start screen sharing</span>
+                                        </div>
+                                    </button>
+                                    
+                                    <button class="quick-action-btn quaternary" id="audioOnlyBtn">
+                                        <div class="action-icon">
+                                            <i class="fas fa-microphone"></i>
+                                        </div>
+                                        <div class="action-content">
+                                            <span class="action-title">Audio Only</span>
+                                            <span class="action-desc">Start with Voice Call </span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                       <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <button class="btn btn-text">View All</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list" id="activityList">
+                            <!-- Activities will be loaded here -->
+                            <div class="activity-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading activities...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        
+                    </div>
+
+                
+                       <div class="container">
+    
+
+      
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h2>Upcoming Meetings</h2>
+                <button class="manage-btn" onclick="refreshMeetings()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Loading state -->
+            <div id="loadingContainer" class="loading-container">
+                <div class="loading-spinner"></div>
+                <span>Loading your meetings...</span>
+            </div>
+
+            <!-- Meetings container -->
+            <div id="meetingsContainer" class="meetings-grid" style="display: none;">
+                <!-- Meetings will be populated here -->
+            </div>
+
+            <!-- Empty state -->
+            <div id="emptyState" class="empty-state-dashboard" style="display: none;">
+                <i class="fas fa-calendar"></i>
+                <h3>No Upcoming Meetings</h3>
+                <p>You don't have any scheduled meetings yet.<br>Start by scheduling your first meeting!</p>
+             <button class="btn schedule-btn" onclick="window.open('/schedule', '_blank')">Schedule Meeting</button>
+
+            </div>
+
+            <!-- Error state -->
+            <div id="errorState" class="error-state" style="display: none;"
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Unable to Load Meetings</h3>
+                <p id="errorMessage">There was an error loading your meetings. Please try again.</p>
+                <button class="btn btn-primary" onclick="loadMeetings()">
+                    <i class="fas fa-retry"></i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+                </section>
+
+                <!-- Other sections (hidden by default) -->
+                <section id="calls" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h1>Video Calls</h1>
+                            <p>Manage your active and scheduled video calls.</p>
+                        </div>
+                    </div>
+                    <div class="placeholder-content">
+                        <i class="fas fa-video fa-3x"></i>
+                        <h3>Video Calls Section</h3>
+                        <p>This section would contain your video call management interface.</p>
+                    </div>
+                </section>
+
+
+                <section id="meetings" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h1>Meetings</h1>
+                            <p>Schedule and manage your meetings.</p>
+                        </div>
+                    </div>
+                    <div class="placeholder-content">
+                        <i class="fas fa-calendar-alt fa-3x"></i>
+                        <h3>Meetings Section</h3>
+                        <p>This section would contain your meeting scheduling interface.</p>
+                    </div>
+                </section>
+
+                <section id="history" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h1>Call History</h1>
+                            <p>View your complete call history and analytics.</p>
+                        </div>
+                    </div>
+                    <div class="placeholder-content">
+                        <i class="fas fa-history fa-3x"></i>
+                        <h3>Call History Section</h3>
+                        <p>This section would contain your detailed call history.</p>
+                    </div>
+                </section>
+
+               
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals and Overlays -->
+    <div id="callModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Start New Call</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="call-options">
+                    <div class="call-option" onclick="createMeeting()">
+                        <i class="fas fa-video"></i>
+                        <span>Video Call</span>
+                    </div>
+                    <div class="call-option">
+                        <i class="fas fa-microphone"></i>
+                        <span>Audio Only</span>
+                    </div>
+                    <div class="call-option">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Screen Share</span>
+                    </div>
+                </div>
+                <div class="invite-section">
+                    <input type="text" placeholder="Enter email or phone number..." class="invite-input">
+                    <button class="btn btn-primary">Send Invite</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Logout</h3>
+                <button class="modal-close" id="logoutModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to logout?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
+                    <button class="btn btn-primary" id="confirmLogout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="ModalPopMeeting-overlay" id="ModalPopMeetingOverlay">
+        <div class="ModalPopMeeting">
+            <div class="ModalPopMeeting-header">
+                <h2 class="ModalPopMeeting-title">
+                    <i class="fas fa-users"></i>
+                    Create Meeting
+                </h2>
+                <button class="close-btn" onclick="closeModalPopMeeting()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="ModalPopMeeting-content">
+                <div class="user-info-schedule">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <div class="user-details">
+                        <div class="user-label">Host</div>
+                        <div class="user-name" id="hostName">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="title-input-section">
+                    <label class="input-label">Meeting Title:</label>
+                    <div class="title-input-container">
+                        <i class="fas fa-pen-nib title-input-icon"></i>
+                        <input
+                            type="text"
+                            class="title-input"
+                            id="titleInput"
+                            placeholder="Enter meeting title..."
+                            maxlength="100"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="email-input-section">
+                    <label class="input-label">Invite participantsName (Optional)</label>
+                    <div class="email-input-container">
+                        <i class="fas fa-envelope email-input-icon"></i>
+                        <input
+                            type="email"
+                            class="email-input"
+                            id="emailInput"
+                            placeholder="example@gmail.com"
+                            onkeypress="handleEmailKeyPress(event)"
+                        >
+                    </div>
+                    <button class="add-email-btn" onclick="addParticipant()">
+                        <i class="fas fa-plus"></i>
+                        Add Participant
+                    </button>
+                </div>
+
+                <div class="participantsName-section">
+                    <div class="participantsName-header">
+                        <div class="participantsName-count" id="participantsNameCount">0 participantsName added</div>
+                    </div>
+                    <div class="participantsName-list" id="participantsNameList">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-user-plus"></i>
+                            <p>No participantsName added yet.<br>Enter email addresses above to get started.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+            </div>
+
+            <div class="ModalPopMeeting-actions">
+                <button class="cancel-btn" onclick="closeModalPopMeeting()">Cancel</button>
+                <button class="start-meeting-btn" id="startMeetingBtn" onclick="createMeeting()">
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                    <i class="fas fa-video" id="videoIcon"></i>
+                    <span id="btnText">Start Meeting</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+   
+    <!-- Modern Meeting Popup -->
+      <div class="popup-overlay" id="meetingPopup">
+        <div class="popup-container">
+            <button class="close-btn" id="closePopup">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="popup-header">
+                <div class="popup-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div>
+                    <h2 class="popup-title">Start New Meeting</h2>
+                    <p class="popup-subtitle">Create and share your screen session</p>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label" for="meetingTitle">Meeting Title</label>
+                    <div class="input-container">
+                        <input 
+                            type="text" 
+                            id="meetingTitle" 
+                            class="input-field" 
+                            placeholder="Enter meeting title..."
+                            value=""
+                            maxlength="100"
+                        >
+                    </div>
+                    <div class="character-count" id="characterCount">0/100 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Invite Participants</label>
+                    <div class="email-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input 
+                            type="email" 
+                            id="emailInputShare" 
+                            class="email-input" 
+                            placeholder="Enter Gmail address..."
+                        >
+                        <button type="button" class="add-email-btn-screenShare" id="addEmailBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="errorMessage">Please enter a valid Gmail address</div>
+                    <div class="selected-emails" id="selectedEmails">
+                        <!-- Selected email chips will appear here -->
+                    </div>
+                </div>
+
+                <div class="meeting-preview" id="meetingPreview" style="display: none;">
+                    <h4>Meeting Preview</h4>
+                    <p><strong>Title:</strong> <span id="previewTitle">My Meeting</span></p>
+                    <p><strong>Participants:</strong> <span id="previewParticipants">0 invited</span></p>
+                </div>
+            </div>
+            
+            <button type="submit" class="start-meeting-share glowing" id="startmeetingnoscrn">
+                <div class="btn-content">
+                    <span>Start Meeting</span>
+                </div>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal Overlay -->
+        <div class="conference-backdrop" id="dialogBackdrop">
+        <div class="meeting-wrapper">
+            <!-- Modal Header -->
+            <div class="dialog-header">
+                <h2 class="dialog-heading">Create Meeting</h2>
+                <button class="dismiss-button" id="dismissDialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="conferenceForm">
+                <!-- Meeting Title Input -->
+                <div class="field-group">
+                    <div class="field-wrapper">
+                        <input 
+                            type="text" 
+                            class="text-input" 
+                            id="conferenceTitle" 
+                            placeholder=" "
+                            autocomplete="off"
+                            maxlength="100"
+                            required
+                        >
+                        <label class="field-label" for="conferenceTitle">Meeting Title</label>
+                    </div>
+                    <div class="error-message" id="titleError"></div>
+                </div>
+
+                <!-- Email Invitation Input -->
+                <div class="field-group">
+                    <div class="field-wrapper">
+                        <div class="email-field-wrapper">
+                            <input 
+                                type="email" 
+                                class="text-input" 
+                                id="contactInput" 
+                                placeholder=" "
+                                autocomplete="off"
+                            >
+                            <label class="field-label" for="contactInput">Invite Participants</label>
+                            
+                            <!-- Email Suggestions Dropdown -->
+                            <div class="email-suggestions" id="contactOptions"></div>
+                        </div>
+                        
+                        <button type="button" class="participant-add-btn" id="addContactBtn">
+                            <i class="fas fa-plus"></i>
+                            Add Participant
+                        </button>
+                    </div>
+
+                    <!-- Participants List -->
+                    <div class="attendees-section">
+                        <div class="participants-label">Invited Participants:</div>
+                        <div class="participant-tags" id="attendeeChips"></div>
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="controls-container">
+                    <button type="button" class="control-button dismiss-control" id="dismissControl">
+                        Cancel
+                    </button>
+                    <button type="submit" class="control-button start-meeting-btn" id="launchConferenceBtn">
+                        <i class="fas fa-video"></i>
+                        Start Meeting
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+        <div id="xp98stats-export-modal-overlay" class="xp98stats-modal-overlay">
+        <div class="xp98stats-export-modal">
+            <div class="xp98stats-modal-header">
+                <h2 class="xp98stats-modal-title">
+                    <i class="fas fa-arrow-down"></i>
+                    Export Report
+                </h2>
+                <p class="xp98stats-modal-subtitle">Choose your preferred export format</p>
+                <button id="xp98stats-close-modal" class="xp98stats-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="xp98stats-modal-body">
+                <div id="xp98stats-success-msg" class="xp98stats-success-message" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Report exported successfully!</span>
+                </div>
+                <div class="xp98stats-format-grid">
+                    <div class="xp98stats-format-option" data-format="txt">
+                        <i class="fas fa-file-alt xp98stats-format-icon"></i>
+                        <div class="xp98stats-format-name">Text File</div>
+                        <div class="xp98stats-format-desc">Plain text format (.txt)</div>
+                    </div>
+                    <div class="xp98stats-format-option" data-format="xlsx">
+                        <i class="fas fa-file-excel xp98stats-format-icon"></i>
+                        <div class="xp98stats-format-name">Excel File</div>
+                        <div class="xp98stats-format-desc">Microsoft Excel (.xlsx)</div>
+                    </div>
+                    <div class="xp98stats-format-option" data-format="pdf">
+                        <i class="fas fa-file-pdf xp98stats-format-icon"></i>
+                        <div class="xp98stats-format-name">PDF Document</div>
+                        <div class="xp98stats-format-desc">Portable document (.pdf)</div>
+                    </div>
+                    <div class="xp98stats-format-option" data-format="docx">
+                        <i class="fas fa-file-word xp98stats-format-icon"></i>
+                        <div class="xp98stats-format-name">Word Document</div>
+                        <div class="xp98stats-format-desc">Microsoft Word (.docx)</div>
+                    </div>
+                </div>
+                <div class="xp98stats-modal-actions">
+                    <button id="xp98stats-cancel-btn" class="xp98stats-btn xp98stats-btn-secondary">
+                     
+                        Cancel
+                    </button>
+                    <button id="xp98stats-export-btn" class="xp98stats-btn xp98stats-btn-primary" disabled>
+                    
+                        <span id="xp98stats-export-btn-text">Export Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script>
+     
+        class MeetingCreator {
+            constructor() {
+                this.form = document.getElementById('conferenceForm');
+                this.titleInput = document.getElementById('conferenceTitle');
+                this.emailInput = document.getElementById('contactInput');
+                this.addBtn = document.getElementById('addContactBtn');
+                this.participantsContainer = document.getElementById('attendeeChips');
+                this.submitBtn = document.getElementById('launchConferenceBtn');
+                this.dismissBtn = document.getElementById('dismissDialog');
+                this.dismissControl = document.getElementById('dismissControl');
+                
+                this.participants = [];
+                this.isCreating = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.setDefaultMeetingName();
+                this.titleInput.focus();
+            }
+            
+            async setDefaultMeetingName() {
+                try {
+                    const response = await fetch('/api/user');
+                    const data = await response.json();
+                    if (data.user && data.user.name) {
+                        this.titleInput.value = `${data.user.name}'s Meeting`;
+                        this.titleInput.dispatchEvent(new Event('input'));
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    this.titleInput.value = "New Meeting";
+                    this.titleInput.dispatchEvent(new Event('input'));
+                }
+            }
+            
+            bindEvents() {
+                // Form submission
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Add participant
+                this.addBtn.addEventListener('click', () => this.addParticipant());
+                this.emailInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.addParticipant();
+                    }
+                });
+                
+                // Dismiss buttons
+                this.dismissBtn.addEventListener('click', () => this.dismiss());
+                this.dismissControl.addEventListener('click', () => this.dismiss());
+                
+                // Click outside to dismiss
+                document.getElementById('dialogBackdrop').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        this.dismiss();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.dismiss();
+                    }
+                });
+                
+                // Input validation
+                this.titleInput.addEventListener('input', () => this.validateTitle());
+                this.emailInput.addEventListener('input', () => this.validateEmail());
+            }
+            
+            validateTitle() {
+                const titleError = document.getElementById('titleError');
+                const title = this.titleInput.value.trim();
+                
+                if (!title) {
+                    this.showError(titleError, 'Meeting title is required');
+                    return false;
+                } else if (title.length > 100) {
+                    this.showError(titleError, 'Meeting title is too long (max 100 characters)');
+                    return false;
+                } else {
+                    this.hideError(titleError);
+                    return true;
+                }
+            }
+            
+            validateEmail() {
+                const emailError = document.getElementById('emailError');
+                const email = this.emailInput.value.trim();
+                
+                if (email && !this.isValidEmail(email)) {
+                    this.showError(emailError, 'Please enter a valid email address');
+                    return false;
+                } else {
+                    this.hideError(emailError);
+                    return true;
+                }
+            }
+            
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            showError(element, message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+            
+            hideError(element) {
+                element.style.display = 'none';
+            }
+            
+            addParticipant() {
+                const email = this.emailInput.value.trim();
+                
+                if (!email) {
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                if (!this.isValidEmail(email)) {
+                    this.showError(document.getElementById('emailError'), 'Please enter a valid email address');
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                if (this.participants.includes(email)) {
+                    this.showError(document.getElementById('emailError'), 'This participant is already added');
+                    this.emailInput.focus();
+                    return;
+                }
+                
+                this.participants.push(email);
+                this.renderParticipants();
+                this.emailInput.value = '';
+                this.hideError(document.getElementById('emailError'));
+                this.emailInput.focus();
+            }
+            
+            removeParticipant(email) {
+                this.participants = this.participants.filter(p => p !== email);
+                this.renderParticipants();
+            }
+            
+            renderParticipants() {
+                if (this.participants.length === 0) {
+                    this.participantsContainer.innerHTML = '<span style="color: #6b7280; font-style: italic;">No participants added yet</span>';
+                    return;
+                }
+                
+                const html = this.participants.map(email => `
+                    <div class="participant-tag">
+                        ${this.getEmailName(email)}
+                        <button type="button" class="remove-participant" onclick="meetingCreator.removeParticipant('${email}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                this.participantsContainer.innerHTML = html;
+            }
+            
+            getEmailName(email) {
+                return email.split('@')[0];
+            }
+            
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                if (this.isCreating) return;
+                
+                // Validate form
+                const isTitleValid = this.validateTitle();
+                const isEmailValid = this.validateEmail();
+                
+                if (!isTitleValid || !isEmailValid) {
+                    return;
+                }
+                
+                const meetingTitle = this.titleInput.value.trim();
+                
+                if (!meetingTitle) {
+                    this.showError(document.getElementById('titleError'), 'Meeting title is required');
+                    this.titleInput.focus();
+                    return;
+                }
+                
+                this.isCreating = true;
+                this.updateSubmitButton(true);
+                
+                try {
+                    // Create meeting
+                    const response = await fetch('/api/create-meeting', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            meetingName: meetingTitle,
+                            participants: this.participants
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to create meeting');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Store meeting creation info in sessionStorage for auto video stop
+                    sessionStorage.setItem('autoStopVideo', 'true');
+                    sessionStorage.setItem('fromCreateForm', 'true');
+                    
+                    // Redirect to host page with meeting name
+                    const hostUrl = `/host/${data.meetingId}?name=${encodeURIComponent(meetingTitle)}`;
+                    window.location.href = hostUrl;
+                    
+                } catch (error) {
+                    console.error('Error creating meeting:', error);
+                    this.showError(document.getElementById('titleError'), 'Failed to create meeting. Please try again.');
+                    this.isCreating = false;
+                    this.updateSubmitButton(false);
+                }
+            }
+            
+            updateSubmitButton(loading) {
+                if (loading) {
+                    this.submitBtn.disabled = true;
+                    this.submitBtn.innerHTML = `
+                        <div class="loading-spinner"></div>
+                        Creating Meeting...
+                    `;
+                } else {
+                    this.submitBtn.disabled = false;
+                    this.submitBtn.innerHTML = `
+                        <i class="fas fa-video"></i>
+                        Start Meeting
+                    `;
+                }
+            }
+            
+            dismiss() {
+                if (this.isCreating) return;
+                
+                // Navigate back to dashboard or previous page
+                if (document.referrer && document.referrer !== window.location.href) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        let meetingCreator;
+        document.addEventListener('DOMContentLoaded', () => {
+            meetingCreator = new MeetingCreator();
+        });
+        
+        // Make meetingCreator globally accessible for onclick handlers
+        window.meetingCreator = meetingCreator;
+
+</script>
+
+<script>
+    function updateMeetingCount() {
+    // Get the meetings container
+    const meetingsContainer = document.getElementById('meetingsContainer');
+    
+    if (!meetingsContainer) return;
+    
+    // Count all meeting cards within the container
+    const meetingCards = meetingsContainer.querySelectorAll('.meeting-card');
+    const meetingCount = meetingCards.length;
+    
+    // Update the stat number element
+    const meetingScheduledElement = document.getElementById('meetingScheduledNo');
+    if (meetingScheduledElement) {
+        meetingScheduledElement.textContent = meetingCount;
+    }
+}
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up observer to watch for meetings being loaded
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                // Check if meeting cards were added or removed
+                const hasChanges = Array.from(mutation.addedNodes).some(node => 
+                    node.nodeType === 1 && (node.classList.contains('meeting-card') || 
+                    node.querySelector && node.querySelector('.meeting-card'))
+                ) || Array.from(mutation.removedNodes).some(node => 
+                    node.nodeType === 1 && (node.classList.contains('meeting-card') || 
+                    node.querySelector && node.querySelector('.meeting-card'))
+                );
+                
+                if (hasChanges) {
+                    updateMeetingCount();
+                }
+            }
+        });
+    });
+
+    // Observe changes to the meetings container
+    const meetingsContainer = document.getElementById('meetingsContainer');
+    if (meetingsContainer) {
+        observer.observe(meetingsContainer, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Initial count (in case meetings are already loaded)
+        updateMeetingCount();
+    }
+    
+    // Also observe the loading container to detect when meetings finish loading
+    const loadingContainer = document.getElementById('loadingContainer');
+    if (loadingContainer) {
+        const loadingObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    // If loading container is hidden, meetings might have loaded
+                    if (loadingContainer.style.display === 'none') {
+                        setTimeout(updateMeetingCount, 100); // Small delay to ensure DOM is updated
+                    }
+                }
+            });
+        });
+        
+        loadingObserver.observe(loadingContainer, {
+            attributes: true,
+            attributeFilter: ['style']
+        });
+    }
+});
+</script>

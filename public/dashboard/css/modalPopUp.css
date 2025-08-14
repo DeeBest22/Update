@@ -1,0 +1,551 @@
+  .quick-action-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #e2e8f0;
+            font-size: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .action-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .action-desc {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        /* ModalPopMeeting Styles */
+        .ModalPopMeeting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .ModalPopMeeting-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .ModalPopMeeting {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            height: 650px;
+            max-height: 90vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ModalPopMeeting-overlay.active .ModalPopMeeting {
+            transform: scale(1) translateY(0);
+        }
+
+        .ModalPopMeeting-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 32px 0 32px;
+            flex-shrink: 0;
+        }
+
+        .ModalPopMeeting-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ModalPopMeeting-title i {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: #94a3b8;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+            color: #e2e8f0;
+        }
+
+        .ModalPopMeeting-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ModalPopMeeting-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ModalPopMeeting-content::-webkit-scrollbar-track {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .ModalPopMeeting-content::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .ModalPopMeeting-content::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* User Info Section */
+        .user-info-schedule {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 16px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .title-input-section {
+            margin-bottom: 24px;
+        }
+
+        .email-input-section {
+            margin-bottom: 24px;
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .title-input-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .title-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #475569;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #334155;
+            color: #f1f5f9;
+            box-sizing: border-box;
+        }
+
+        .title-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .title-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .title-input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 18px;
+        }
+
+        .email-input-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #475569;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #334155;
+            color: #f1f5f9;
+            box-sizing: border-box;
+        }
+
+        .email-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .email-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .email-input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 18px;
+        }
+
+        .add-email-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-email-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Participants Section - Updated class names */
+        .participantsName-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .participantsName-header {
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .participantsName-count {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .participantsName-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 120px;
+            max-height: 200px;
+        }
+
+        .participantsName-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .participantsName-list::-webkit-scrollbar-track {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .participantsName-list::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .participantsName-list::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(102, 126, 234, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .participant-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .participant-email {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .remove-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            transform: scale(1.05);
+        }
+
+        /* Message Styles */
+        .error-message {
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            padding: 12px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .ModalPopMeeting-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 0 32px 32px 32px;
+            flex-shrink: 0;
+        }
+
+        .start-meeting-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            position: relative;
+        }
+
+        .start-meeting-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .start-meeting-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .start-meeting-btn.loading .loading-spinner {
+            display: block;
+        }
+
+        .start-meeting-btn.loading #videoIcon {
+            display: none;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            color: #94a3b8;
+            border: 2px solid #475569;
+            padding: 16px 24px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            border-color: #64748b;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-height: 700px) {
+            .ModalPopMeeting {
+                height: 100vh;
+            }
+        }

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .dashboard-card {
+            padding: 30px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 15px;
+        }
+
+        .card-header h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-text {
+            background: transparent;
+            color: #667eea;
+        }
+
+        .btn-text:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .activity-new {
+            background: rgba(102, 126, 234, 0.1);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .activity-avatar {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .activity-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .activity-time {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .activity-duration {
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .activity-status {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .activity-status.completed {
+            background: #27ae60;
+        }
+
+        .activity-status.scheduled {
+            background: #3498db;
+        }
+
+        .activity-status.missed {
+            background: #e74c3c;
+        }
+
+        .activity-status.cancelled {
+            background: #95a5a6;
+        }
+
+        .activity-loading,
+        .activity-empty,
+        .activity-error {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .activity-loading i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .activity-empty i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+
+        .activity-error i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #e74c3c;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .notification-error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .notification-info {
+            border-left: 4px solid #3498db;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <main class="main-content">
+            <section class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <button class="btn btn-text" onclick="loadRecentActivities()">Refresh</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list" id="activityList">
+                            <!-- Activities will be loaded here -->
+                            <div class="activity-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Loading activities...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Dashboard functionality
+        let currentUser = null;
+        let socket = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Dashboard initializing...');
+            try {
+                // Initialize socket connection
+                socket = io();
+                console.log('Socket initialized');
+                
+                // Load user data first
+                await loadUserData();
+                console.log('User data loaded');
+                
+                // Load recent activities
+                await loadRecentActivities();
+                console.log('Activities loaded');
+                
+                // Setup real-time updates
+                setupRealtimeUpdates();
+                console.log('Real-time updates setup complete');
+                
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+                showError('Failed to load dashboard data');
+            }
+        });
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                console.log('Fetching user data...');
+                const response = await fetch('/api/user');
+                console.log('User API response status:', response.status);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('User not authenticated, redirecting to login');
+                        window.location.href = '/';
+                        return;
+                    }
+                    throw new Error(`Failed to fetch user data: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('User data received:', data);
+                currentUser = data.user;
+                
+                // Join user-specific room for real-time updates
+                if (socket && currentUser) {
+                    socket.emit('join-user-room', currentUser.id || currentUser._id);
+                    console.log('Joined user room:', currentUser.id || currentUser._id);
+                }
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                // Don't redirect immediately, try to load activities anyway
+                showError('Failed to load user data');
+            }
+        }
+
+        // Load recent activities
+        async function loadRecentActivities() {
+            try {
+                console.log('Fetching recent activities...');
+                const response = await fetch('/api/recent-activities');
+                console.log('Activities API response status:', response.status);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('Not authenticated for activities');
+                        showActivityError('Please log in to view activities');
+                        return;
+                    }
+                    throw new Error(`Failed to fetch recent activities: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Activities data received:', data);
+                
+                displayRecentActivities(data.activities || []);
+                
+            } catch (error) {
+                console.error('Error loading recent activities:', error);
+                showActivityError('Failed to load activities');
+            }
+        }
+
+        // Display recent activities
+        function displayRecentActivities(activities) {
+            console.log('Displaying activities:', activities);
+            const activityList = document.getElementById('activityList');
+            if (!activityList) {
+                console.error('Activity list element not found');
+                return;
+            }
+            
+            if (!activities || activities.length === 0) {
+                console.log('No activities to display');
+                activityList.innerHTML = `
+                    <div class="activity-empty">
+                        <i class="fas fa-calendar-times"></i>
+                        <div>No recent activities</div>
+                        <small>Your meeting activities will appear here</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log(`Displaying ${activities.length} activities`);
+            activityList.innerHTML = activities.map(activity => {
+                const timeAgo = getTimeAgo(new Date(activity.createdAt));
+                const statusIcon = getStatusIcon(activity.status);
+                const statusClass = activity.status;
+                
+                // Handle user data - it might be populated or not
+                const userName = activity.userId?.firstName && activity.userId?.lastName 
+                    ? `${activity.userId.firstName} ${activity.userId.lastName}`
+                    : (activity.userId?.email || 'Unknown User');
+                    
+                const userAvatar = activity.userId?.profilePicture || 
+                    'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop';
+                
+                return `
+                    <div class="activity-item">
+                        <div class="activity-avatar">
+                            <img src="${userAvatar}" alt="${userName}" onerror="this.src='https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'">
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${activity.meetingName || 'Untitled Meeting'}</div>
+                            <div class="activity-time">${timeAgo}</div>
+                            ${activity.duration ? `<div class="activity-duration">${activity.duration} minutes</div>` : ''}
+                            ${activity.participantCount > 1 ? `<div class="activity-duration">${activity.participantCount} participants</div>` : ''}
+                        </div>
+                        <div class="activity-status ${statusClass}">
+                            <i class="${statusIcon}"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get status icon based on activity status
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'completed':
+                    return 'fas fa-check';
+                case 'scheduled':
+                    return 'fas fa-calendar';
+                case 'missed':
+                    return 'fas fa-times';
+                case 'cancelled':
+                    return 'fas fa-ban';
+                default:
+                    return 'fas fa-circle';
+            }
+        }
+
+        // Get time ago string
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'Just now';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 604800) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // Show activity loading error
+        function showActivityError(message = 'Failed to load activities') {
+            const activityList = document.getElementById('activityList');
+            if (activityList) {
+                activityList.innerHTML = `
+                    <div class="activity-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>${message}</div>
+                        <button class="btn btn-sm btn-text" onclick="loadRecentActivities()" style="margin-top: 10px;">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Setup real-time updates
+        function setupRealtimeUpdates() {
+            if (!socket) {
+                console.warn('Socket not available for real-time updates');
+                return;
+            }
+            
+            console.log('Setting up real-time updates...');
+            
+            // Listen for activity updates
+            socket.on('activity-updated', (data) => {
+                console.log('Activity updated:', data);
+                
+                if (data.type === 'meeting-completed') {
+                    // Reload activities to show the new one
+                    loadRecentActivities();
+                    
+                    // Show notification
+                    showNotification(`Meeting "${data.activity.meetingName}" completed`, 'success');
+                }
+            });
+            
+            // Handle connection events
+            socket.on('connect', () => {
+                console.log('Socket connected');
+                // Rejoin user room if we have user data
+                if (currentUser) {
+                    socket.emit('join-user-room', currentUser.id || currentUser._id);
+                }
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Socket disconnected');
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error);
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            console.log('Showing notification:', message, type);
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Show error message
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
+        // Test function to create sample activity (for testing)
+        function createTestActivity() {
+            if (!socket) {
+                console.error('Socket not available');
+                return;
+            }
+            
+            const testActivity = {
+                type: 'meeting-completed',
+                activity: {
+                    id: 'test-' + Date.now(),
+                    meetingName: 'Test Meeting - ' + new Date().toLocaleTimeString(),
+                    status: 'completed',
+                    duration: Math.floor(Math.random() * 60) + 5,
+                    participantCount: Math.floor(Math.random() * 5) + 1,
+                    createdAt: new Date()
+                }
+            };
+            
+            // Simulate receiving the update
+            socket.emit('activity-updated', testActivity);
+        }
+
+        // Add global access for testing
+        window.createTestActivity = createTestActivity;
+        window.loadRecentActivities = loadRecentActivities;
+    </script>
+</body>
+</html>
