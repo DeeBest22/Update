@@ -1,4 +1,4 @@
-// Enhanced meetingActivity.js - Updated version
+// Enhanced meetingActivity.js - Updated version with participant tracking
 import mongoose from 'mongoose';
 
 // Meeting Activity Schema
@@ -15,7 +15,10 @@ const meetingActivitySchema = new mongoose.Schema({
   participantCount: { type: Number, default: 1 },
   startTime: { type: Date, required: true },
   endTime: { type: Date },
-  isHost: { type: Boolean, default: false }, // NEW: Track if user was the host
+  isHost: { type: Boolean, default: false },
+  joinTime: { type: Date }, // NEW: Track when participant joined
+  leaveTime: { type: Date }, // NEW: Track when participant left
+  finalMeetingName: { type: String }, // NEW: Store the final meeting name
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -54,7 +57,7 @@ export const setupMeetingActivity = (app, io) => {
       }
       
       const userId = req.session.userId || req.user._id;
-      const { meetingName, meetingId, status, duration, participantCount, startTime, endTime, isHost } = req.body;
+      const { meetingName, meetingId, status, duration, participantCount, startTime, endTime, isHost, joinTime, leaveTime, finalMeetingName } = req.body;
       
       if (!meetingName || !meetingId) {
         return res.status(400).json({ error: 'Meeting name and ID are required' });
@@ -69,7 +72,10 @@ export const setupMeetingActivity = (app, io) => {
         participantCount: participantCount || 1,
         startTime: startTime ? new Date(startTime) : new Date(),
         endTime: endTime ? new Date(endTime) : new Date(),
-        isHost: isHost || false // NEW: Store if user was host
+        isHost: isHost || false,
+        joinTime: joinTime ? new Date(joinTime) : null,
+        leaveTime: leaveTime ? new Date(leaveTime) : null,
+        finalMeetingName: finalMeetingName || meetingName
       });
       
       await activity.save();
@@ -79,7 +85,7 @@ export const setupMeetingActivity = (app, io) => {
         type: 'meeting-completed',
         activity: {
           id: activity._id,
-          meetingName: activity.meetingName,
+          meetingName: activity.finalMeetingName || activity.meetingName,
           status: activity.status,
           duration: activity.duration,
           participantCount: activity.participantCount,
@@ -117,14 +123,42 @@ export const setupMeetingActivity = (app, io) => {
           meetingName,
           userId,
           startTime: new Date(),
+          joinTime: new Date(), // NEW: Track join time for participants
           participantCount: 1,
-          isHost: isHost || false, // NEW: Track host status
-          activitySaved: false // Flag to prevent duplicate saves
+          isHost: isHost || false,
+          activitySaved: false
         };
         
         console.log(`Meeting started: ${meetingName} (${meetingId}) by user ${userId}, isHost: ${isHost}`);
       } catch (error) {
         console.error('Error handling meeting start:', error);
+      }
+    });
+
+    // NEW: Handle participant joining existing meeting
+    socket.on('participant-joined-meeting', async (data) => {
+      try {
+        const { meetingId, meetingName, userId } = data;
+        
+        if (!userId || !meetingId || !meetingName) {
+          return;
+        }
+
+        // Store meeting data for participants who join after meeting started
+        socket.meetingData = {
+          meetingId,
+          meetingName,
+          userId,
+          startTime: new Date(), // This will be overridden with actual join time
+          joinTime: new Date(),
+          participantCount: 1,
+          isHost: false,
+          activitySaved: false
+        };
+        
+        console.log(`Participant joined meeting: ${meetingName} (${meetingId}) by user ${userId}`);
+      } catch (error) {
+        console.error('Error handling participant join:', error);
       }
     });
 
@@ -135,80 +169,35 @@ export const setupMeetingActivity = (app, io) => {
         
         if (socket.meetingData && socket.meetingData.meetingId === meetingId) {
           const oldName = socket.meetingData.meetingName;
-          socket.meetingData.meetingName = newName; // Update stored name
+          socket.meetingData.meetingName = newName;
+          socket.meetingData.finalMeetingName = newName; // Store as final name
           console.log(`Meeting name updated from "${oldName}" to "${newName}" for meeting ${meetingId}`);
-          
-          // Broadcast to all participants in the meeting
-          socket.broadcast.to(meetingId).emit('meeting-name-updated', {
-            newName,
-            changedBy: userId
-          });
         }
       } catch (error) {
         console.error('Error handling meeting name change:', error);
       }
     });
 
-    // NEW: Handle participant join (for non-hosts)
-    socket.on('participant-joined-meeting', async (data) => {
-      try {
-        const { meetingId, meetingName, userId } = data;
-        
-        if (!userId || !meetingId || !meetingName) {
-          return;
-        }
-
-        // Store meeting start data for participants
-        socket.meetingData = {
-          meetingId,
-          meetingName,
-          userId,
-          startTime: new Date(),
-          participantCount: 1,
-          isHost: false, // Participants are not hosts
-          activitySaved: false
-        };
-        
-        console.log(`Participant joined meeting: ${meetingName} (${meetingId}) by user ${userId}`);
-      } catch (error) {
-        console.error('Error handling participant join:', error);
-      }
-    });
-
-    // Handle participant join
-    socket.on('participant-joined', (data) => {
-      if (socket.meetingData) {
-        socket.meetingData.participantCount = (socket.meetingData.participantCount || 1) + 1;
-      }
-    });
-
-    // Handle participant leave
-    socket.on('participant-left', (data) => {
-      if (socket.meetingData && socket.meetingData.participantCount > 1) {
-        socket.meetingData.participantCount -= 1;
-      }
-    });
-
-    // NEW: Handle user leaving meeting (for participants)
-    socket.on('user-left-meeting', async (data) => {
+    // NEW: Handle participant leaving meeting (for non-hosts)
+    socket.on('participant-left-meeting', async (data) => {
       try {
         const { meetingId, meetingName, userId, duration, joinTime, leaveTime } = data;
         
         if (!userId || !meetingId) {
-          console.log('Missing required data for user-left-meeting');
+          console.log('Missing required data for participant-left-meeting');
           return;
         }
 
         // Use the final meeting name from the client or stored name
         const finalMeetingName = (meetingName && meetingName.trim()) 
           ? meetingName.trim() 
-          : (socket.meetingData ? socket.meetingData.meetingName : 'Meeting');
+          : (socket.meetingData ? socket.meetingData.finalMeetingName || socket.meetingData.meetingName : 'Meeting');
         
-        const startTime = joinTime ? new Date(joinTime) : (socket.meetingData ? socket.meetingData.startTime : new Date());
+        const startTime = joinTime ? new Date(joinTime) : (socket.meetingData ? socket.meetingData.joinTime : new Date());
         const endTime = leaveTime ? new Date(leaveTime) : new Date();
         const calculatedDuration = duration || Math.round((endTime - startTime) / (1000 * 60));
 
-        console.log(`User left meeting. Final name: "${finalMeetingName}", Duration: ${calculatedDuration} minutes`);
+        console.log(`Participant left meeting. Final name: "${finalMeetingName}", Duration: ${calculatedDuration} minutes`);
 
         const activity = new MeetingActivity({
           userId: userId,
@@ -219,7 +208,10 @@ export const setupMeetingActivity = (app, io) => {
           participantCount: socket.meetingData ? socket.meetingData.participantCount : 1,
           startTime: startTime,
           endTime: endTime,
-          isHost: false // User is leaving as participant, not host
+          joinTime: startTime,
+          leaveTime: endTime,
+          isHost: false,
+          finalMeetingName: finalMeetingName
         });
 
         await activity.save();
@@ -229,7 +221,7 @@ export const setupMeetingActivity = (app, io) => {
           type: 'meeting-completed',
           activity: {
             id: activity._id,
-            meetingName: activity.meetingName,
+            meetingName: activity.finalMeetingName,
             status: activity.status,
             duration: activity.duration,
             participantCount: activity.participantCount,
@@ -248,7 +240,7 @@ export const setupMeetingActivity = (app, io) => {
       }
     });
 
-    // MAIN FIX: Handle meeting end - only save activity here, not in disconnect
+    // Handle meeting end - for hosts
     socket.on('meeting-ended', async (data) => {
       try {
         if (!socket.meetingData) {
@@ -268,7 +260,7 @@ export const setupMeetingActivity = (app, io) => {
         // Use the final meeting name (from client data or stored name)
         const finalMeetingName = (data && data.meetingName && data.meetingName.trim()) 
           ? data.meetingName.trim() 
-          : socket.meetingData.meetingName;
+          : socket.meetingData.finalMeetingName || socket.meetingData.meetingName;
         
         console.log(`Meeting ended. Final name: "${finalMeetingName}"`);
         console.log('Duration:', duration, 'minutes');
@@ -282,7 +274,10 @@ export const setupMeetingActivity = (app, io) => {
           participantCount: socket.meetingData.participantCount || 1,
           startTime: socket.meetingData.startTime,
           endTime,
-          isHost: socket.meetingData.isHost || false // NEW: Store host status
+          joinTime: socket.meetingData.joinTime || socket.meetingData.startTime,
+          leaveTime: endTime,
+          isHost: socket.meetingData.isHost || false,
+          finalMeetingName: finalMeetingName
         });
 
         await activity.save();
@@ -295,7 +290,7 @@ export const setupMeetingActivity = (app, io) => {
           type: 'meeting-completed',
           activity: {
             id: activity._id,
-            meetingName: activity.meetingName,
+            meetingName: activity.finalMeetingName,
             status: activity.status,
             duration: activity.duration,
             participantCount: activity.participantCount,
@@ -316,7 +311,7 @@ export const setupMeetingActivity = (app, io) => {
       }
     });
 
-    // MODIFIED: Only save on disconnect if meeting wasn't properly ended
+    // Handle disconnect - only save if meeting wasn't properly ended
     const handleDisconnect = async () => {
       try {
         // Only save if meeting data exists, wasn't properly ended, and activity wasn't already saved
@@ -328,14 +323,17 @@ export const setupMeetingActivity = (app, io) => {
 
           const activity = new MeetingActivity({
             userId: socket.meetingData.userId,
-            meetingName: socket.meetingData.meetingName, // Use current stored name
+            meetingName: socket.meetingData.finalMeetingName || socket.meetingData.meetingName,
             meetingId: socket.meetingData.meetingId,
             status: 'completed',
             duration,
             participantCount: socket.meetingData.participantCount || 1,
             startTime: socket.meetingData.startTime,
             endTime,
-            isHost: socket.meetingData.isHost || false // NEW: Store host status
+            joinTime: socket.meetingData.joinTime || socket.meetingData.startTime,
+            leaveTime: endTime,
+            isHost: socket.meetingData.isHost || false,
+            finalMeetingName: socket.meetingData.finalMeetingName || socket.meetingData.meetingName
           });
 
           await activity.save();
@@ -343,14 +341,14 @@ export const setupMeetingActivity = (app, io) => {
           // Mark as saved
           socket.meetingData.activitySaved = true;
           
-          console.log(`Meeting activity saved on disconnect: ${socket.meetingData.meetingName} (${duration} minutes), isHost: ${socket.meetingData.isHost}`);
+          console.log(`Meeting activity saved on disconnect: ${socket.meetingData.finalMeetingName || socket.meetingData.meetingName} (${duration} minutes), isHost: ${socket.meetingData.isHost}`);
           
           // Emit real-time update
           io.to(`user_${socket.meetingData.userId}`).emit('activity-updated', {
             type: 'meeting-completed',
             activity: {
               id: activity._id,
-              meetingName: activity.meetingName,
+              meetingName: activity.finalMeetingName,
               status: activity.status,
               duration: activity.duration,
               participantCount: activity.participantCount,

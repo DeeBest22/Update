@@ -1,295 +1,169 @@
+// Meeting Statistics Dashboard JavaScript
 class MeetingStatsManager {
-  constructor() {
-    this.socket = null;
-    this.statsContainer = null;
-    this.isInitialized = false;
-    this.currentStats = null;
-    this.updateInterval = null;
-  }
-
-  // Initialize the stats manager
-  init(socket) {
-    this.socket = socket;
-    this.statsContainer = document.querySelector('.stats-grid');
-    
-    if (!this.statsContainer) {
-      console.warn('Stats container not found');
-      return;
+    constructor() {
+        this.socket = null;
+        this.currentUser = null;
+        this.stats = null;
+        this.init();
     }
 
-    this.setupSocketListeners();
-    this.loadInitialStats();
-    this.startPeriodicUpdates();
-    this.isInitialized = true;
-    
-    console.log('Meeting Stats Manager initialized');
-  }
-
-  // Setup socket event listeners
-  setupSocketListeners() {
-    if (!this.socket) return;
-
-    this.socket.on('stats-updated', (data) => {
-      console.log('Stats updated:', data);
-      this.updateStatsDisplay(data);
-    });
-
-    this.socket.on('stats-error', (error) => {
-      console.error('Stats error:', error);
-      this.showError('Failed to update statistics');
-    });
-  }
-
-  // Load initial statistics
-  async loadInitialStats() {
-    try {
-      const response = await fetch('/api/meeting-stats');
-      const data = await response.json();
-      
-      if (data.success) {
-        this.currentStats = data.stats;
-        this.updateStatsDisplay(data.stats);
-      } else {
-        throw new Error(data.error || 'Failed to load statistics');
-      }
-    } catch (error) {
-      console.error('Error loading initial stats:', error);
-      this.showError('Failed to load statistics');
-    }
-  }
-
-  // Update the stats display
-  updateStatsDisplay(stats) {
-    if (!this.statsContainer || !stats) return;
-
-    // Update Total Calls
-    this.updateStatCard('total-calls', {
-      number: stats.totalCalls.value,
-      change: stats.totalCalls.change,
-      changeType: stats.totalCalls.changeType
-    });
-
-    // Update Call Duration
-    this.updateStatCard('call-duration', {
-      number: stats.totalDuration.value,
-      change: stats.totalDuration.change,
-      changeType: stats.totalDuration.changeType
-    });
-
-
-
- 
-    // Add animation effect
-    this.animateStatsUpdate();
-  }
-
-  // Update individual stat card
-  updateStatCard(cardType, data) {
-    const cardSelectors = {
-      'total-calls': '.stat-card.primary',
-      'call-duration': '.stat-card.success',
-      'participants': '.stat-card.warning',
-      'meetings-scheduled': '.stat-card.info'
-    };
-
-    const card = this.statsContainer.querySelector(cardSelectors[cardType]);
-    if (!card) return;
-
-    const numberElement = card.querySelector('.stat-number');
-    const changeElement = card.querySelector('.stat-change');
-
-    if (numberElement) {
-      numberElement.textContent = data.number;
+    async init() {
+        try {
+            await this.loadUserData();
+            await this.loadStats();
+            this.initializeSocket();
+            this.setupEventListeners();
+            console.log('Meeting stats manager initialized');
+        } catch (error) {
+            console.error('Error initializing meeting stats:', error);
+        }
     }
 
-    if (changeElement) {
-      // Update change text and icon
-      const icon = changeElement.querySelector('i');
-      const changeText = this.getChangeText(data.change, data.changeType);
-      
-      changeElement.className = `stat-change ${data.changeType}`;
-      
-      if (icon) {
-        icon.className = this.getChangeIcon(data.changeType);
-      }
-      
-      // Update text content (preserve icon)
-      const textNode = Array.from(changeElement.childNodes)
-        .find(node => node.nodeType === Node.TEXT_NODE);
-      
-      if (textNode) {
-        textNode.textContent = changeText;
-      } else {
-        changeElement.appendChild(document.createTextNode(changeText));
-      }
+    async loadUserData() {
+        try {
+            const response = await fetch('/api/user');
+            if (response.ok) {
+                const data = await response.json();
+                this.currentUser = data.user;
+                console.log('User data loaded:', this.currentUser);
+            } else if (response.status === 401) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
     }
-  }
 
-  // Get change text based on percentage
-  getChangeText(change, changeType) {
-    if (changeType === 'neutral' || change === 0) {
-      return ' Same as last month';
+    async loadStats() {
+        try {
+            const response = await fetch('/api/meeting-stats');
+            if (response.ok) {
+                const data = await response.json();
+                this.stats = data.stats;
+                this.updateStatsDisplay();
+                console.log('Stats loaded:', this.stats);
+            } else {
+                console.error('Failed to load stats:', response.status);
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
     }
-    
-    const sign = change > 0 ? '+' : '';
-    return ` ${sign}${change}% from last month`;
-  }
 
-  // Get appropriate icon for change type
-  getChangeIcon(changeType) {
-    switch (changeType) {
-      case 'positive':
-        return 'fas fa-arrow-up';
-      case 'negative':
-        return 'fas fa-arrow-down';
-      case 'neutral':
-      default:
-        return 'fas fa-minus';
+    updateStatsDisplay() {
+        if (!this.stats) return;
+
+        // Update total calls
+        const totalCallsElement = document.querySelector('.stat-card.primary .stat-number');
+        if (totalCallsElement) {
+            totalCallsElement.textContent = this.stats.totalCalls.value;
+        }
+
+        const totalCallsChange = document.querySelector('.stat-card.primary .stat-change');
+        if (totalCallsChange) {
+            const change = this.stats.totalCalls.change;
+            const icon = change > 0 ? 'fa-arrow-up' : change < 0 ? 'fa-arrow-down' : 'fa-minus';
+            const className = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
+            
+            totalCallsChange.className = `stat-change ${className}`;
+            totalCallsChange.innerHTML = `
+                <i class="fas ${icon}"></i>
+                ${Math.abs(change)}%
+            `;
+        }
+
+        // Update total duration
+        const totalDurationElement = document.querySelector('.stat-card.success .stat-number');
+        if (totalDurationElement) {
+            totalDurationElement.textContent = this.stats.totalDuration.value;
+        }
+
+        const totalDurationChange = document.querySelector('.stat-card.success .stat-change');
+        if (totalDurationChange) {
+            const change = this.stats.totalDuration.change;
+            const icon = change > 0 ? 'fa-arrow-up' : change < 0 ? 'fa-arrow-down' : 'fa-minus';
+            const className = change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral';
+            
+            totalDurationChange.className = `stat-change ${className}`;
+            totalDurationChange.innerHTML = `
+                <i class="fas ${icon}"></i>
+                ${Math.abs(change)}%
+            `;
+        }
+
+        // Update meetings scheduled
+        const meetingsScheduledElement = document.querySelector('.stat-card.info .stat-number');
+        if (meetingsScheduledElement) {
+            meetingsScheduledElement.textContent = this.stats.meetingsScheduled.value;
+        }
+
+        console.log('Stats display updated');
     }
-  }
 
-  // Animate stats update
-  animateStatsUpdate() {
-    const statNumbers = this.statsContainer.querySelectorAll('.stat-number');
-    
-    statNumbers.forEach(element => {
-      element.style.transform = 'scale(1.05)';
-      element.style.transition = 'transform 0.3s ease';
-      
-      setTimeout(() => {
-        element.style.transform = 'scale(1)';
-      }, 300);
-    });
-  }
+    initializeSocket() {
+        try {
+            this.socket = io();
+            
+            this.socket.on('connect', () => {
+                console.log('Socket connected for stats');
+                if (this.currentUser) {
+                    this.socket.emit('join-user-room', this.currentUser.id);
+                }
+            });
 
-  // Record meeting start
-  recordMeetingStart(meetingId, meetingTitle = 'Video Call', isScheduled = false) {
-    if (!this.socket) return;
+            this.socket.on('stats-updated', (data) => {
+                console.log('Stats updated via socket:', data);
+                if (data.stats) {
+                    this.stats = data.stats;
+                    this.updateStatsDisplay();
+                }
+            });
 
-    const userId = this.getCurrentUserId();
-    if (!userId) return;
+            this.socket.on('activity-updated', (data) => {
+                console.log('Activity updated, refreshing stats:', data);
+                // Reload stats when new activity is recorded
+                this.loadStats();
+            });
 
-    this.socket.emit('meeting-started', {
-      userId,
-      meetingId,
-      meetingTitle,
-      isScheduled
-    });
-  }
-
-  // Record meeting end
-  recordMeetingEnd(meetingId, participantCount = 1) {
-    if (!this.socket) return;
-
-    const userId = this.getCurrentUserId();
-    if (!userId) return;
-
-    this.socket.emit('meeting-ended', {
-      userId,
-      meetingId,
-      participantCount
-    });
-  }
-
-  // Get current user ID (you may need to adjust this based on your auth system)
-  getCurrentUserId() {
-    // This should be implemented based on how you store user info
-    // For example, from a global variable, localStorage, or data attribute
-    return window.currentUserId || localStorage.getItem('userId') || null;
-  }
-
-  // Start periodic stats updates
-  startPeriodicUpdates() {
-    // Update stats every 5 minutes
-    this.updateInterval = setInterval(() => {
-      this.loadInitialStats();
-    }, 5 * 60 * 1000);
-  }
-
-  // Stop periodic updates
-  stopPeriodicUpdates() {
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
-      this.updateInterval = null;
+        } catch (error) {
+            console.error('Error initializing socket for stats:', error);
+        }
     }
-  }
 
-  // Show error message
-  showError(message) {
-    // You can implement a toast notification or other error display
-    console.error('Stats Error:', message);
-    
-    // Optional: Show a temporary error indicator
-    const errorIndicator = document.createElement('div');
-    errorIndicator.className = 'stats-error';
-    errorIndicator.textContent = message;
-    errorIndicator.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #dc2626;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    `;
-    
-    document.body.appendChild(errorIndicator);
-    
-    // Animate in
-    setTimeout(() => {
-      errorIndicator.style.opacity = '1';
-    }, 100);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-      errorIndicator.style.opacity = '0';
-      setTimeout(() => {
-        document.body.removeChild(errorIndicator);
-      }, 300);
-    }, 3000);
-  }
-
-  // Refresh stats manually
-  async refreshStats() {
-    await this.loadInitialStats();
-  }
-
-  // Get current stats
-  getCurrentStats() {
-    return this.currentStats;
-  }
-
-  // Cleanup
-  destroy() {
-    this.stopPeriodicUpdates();
-    
-    if (this.socket) {
-      this.socket.off('stats-updated');
-      this.socket.off('stats-error');
+    setupEventListeners() {
+        // Add any additional event listeners here
+        console.log('Event listeners set up for meeting stats');
     }
-    
-    this.isInitialized = false;
-  }
+
+    // Method to manually record meeting activity (for testing)
+    async recordMeetingActivity(action, meetingData) {
+        try {
+            const response = await fetch('/api/meeting-stats/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action,
+                    ...meetingData
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.stats = data.stats;
+                this.updateStatsDisplay();
+                console.log('Meeting activity recorded:', data);
+            }
+        } catch (error) {
+            console.error('Error recording meeting activity:', error);
+        }
+    }
 }
 
-// Create global instance
-window.MeetingStatsManager = MeetingStatsManager;
-
-// Auto-initialize if socket is available
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Wait for socket to be available
-  const checkSocket = () => {
-    if (window.socket) {
-      const statsManager = new MeetingStatsManager();
-      statsManager.init(window.socket);
-      window.meetingStatsManager = statsManager;
-    } else {
-      setTimeout(checkSocket, 100);
+    if (typeof window !== 'undefined') {
+        window.meetingStatsManager = new MeetingStatsManager();
     }
-  };
-  
-  checkSocket();
 });
