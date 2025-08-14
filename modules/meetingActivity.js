@@ -189,28 +189,59 @@ export const setupMeetingActivity = (app, io) => {
       }
     });
 
-    // ENHANCED: Handle user leaving meeting (for participants)
-    socket.on('user-left-meeting', async (data) => {
+    // ENHANCED: Handle participant joining meeting (track when participant joins)
+    socket.on('participant-joined-meeting', async (data) => {
       try {
-        const { meetingId, meetingName, userId, duration, joinTime, leaveTime, finalMeetingName } = data;
+        const { meetingId, meetingName, userId, isHost } = data;
+        
+        if (!userId || !meetingId || !meetingName) {
+          console.log('Missing required data for participant-joined-meeting');
+          return;
+        }
+
+        // Store meeting start data for participants
+        socket.meetingData = {
+          meetingId,
+          meetingName,
+          userId,
+          startTime: new Date(),
+          participantCount: 1,
+          isHost: isHost || false, // Participants are not hosts
+          activitySaved: false
+        };
+        
+        console.log(`Participant joined meeting: ${meetingName} (${meetingId}) by user ${userId}`);
+      } catch (error) {
+        console.error('Error handling participant join:', error);
+      }
+    });
+
+    // ENHANCED: Handle participant leaving meeting (when participant leaves/exits)
+    socket.on('participant-left-meeting', async (data) => {
+      try {
+        const { meetingId, userId, finalMeetingName, duration, leaveTime } = data;
         
         if (!userId || !meetingId) {
-          console.log('Missing required data for user-left-meeting');
+          console.log('Missing required data for participant-left-meeting');
+          return;
+        }
+
+        // Prevent duplicate saves
+        if (socket.meetingData && socket.meetingData.activitySaved) {
+          console.log('Meeting activity already saved, skipping duplicate');
           return;
         }
 
         // Use the final meeting name from the client (latest name) or fallback to stored name
         const actualMeetingName = (finalMeetingName && finalMeetingName.trim()) 
           ? finalMeetingName.trim() 
-          : (meetingName && meetingName.trim()) 
-            ? meetingName.trim() 
-            : (socket.meetingData ? socket.meetingData.meetingName : 'Meeting');
+          : (socket.meetingData ? socket.meetingData.meetingName : 'Meeting');
         
-        const startTime = joinTime ? new Date(joinTime) : (socket.meetingData ? socket.meetingData.startTime : new Date());
+        const startTime = socket.meetingData ? socket.meetingData.startTime : new Date();
         const endTime = leaveTime ? new Date(leaveTime) : new Date();
         const calculatedDuration = duration || Math.round((endTime - startTime) / (1000 * 60));
 
-        console.log(`User left meeting. Final name: "${actualMeetingName}", Duration: ${calculatedDuration} minutes`);
+        console.log(`Participant left meeting. Final name: "${actualMeetingName}", Duration: ${calculatedDuration} minutes`);
 
         const activity = new MeetingActivity({
           userId: userId,
@@ -225,6 +256,11 @@ export const setupMeetingActivity = (app, io) => {
         });
 
         await activity.save();
+        
+        // Mark as saved to prevent duplicates
+        if (socket.meetingData) {
+          socket.meetingData.activitySaved = true;
+        }
         
         // Emit to user's socket for real-time updates
         io.to(`user_${userId}`).emit('activity-updated', {
@@ -242,72 +278,13 @@ export const setupMeetingActivity = (app, io) => {
 
         console.log(`Participant activity saved: ${actualMeetingName} (${calculatedDuration} minutes)`);
         
-        // Clear meeting data
-        socket.meetingData = null;
+        // Clear meeting data after saving
+        setTimeout(() => {
+          socket.meetingData = null;
+        }, 1000);
         
       } catch (error) {
         console.error('Error saving participant meeting activity:', error);
-      }
-    });
-
-    // NEW: Handle participant ending meeting (when participant clicks end meeting)
-    socket.on('participant-ended-meeting', async (data) => {
-      try {
-        const { meetingId, meetingName, userId, duration, joinTime, endTime, finalMeetingName } = data;
-        
-        if (!userId || !meetingId) {
-          console.log('Missing required data for participant-ended-meeting');
-          return;
-        }
-
-        // Use the final meeting name from the client (latest name)
-        const actualMeetingName = (finalMeetingName && finalMeetingName.trim()) 
-          ? finalMeetingName.trim() 
-          : (meetingName && meetingName.trim()) 
-            ? meetingName.trim() 
-            : (socket.meetingData ? socket.meetingData.meetingName : 'Meeting');
-        
-        const startTime = joinTime ? new Date(joinTime) : (socket.meetingData ? socket.meetingData.startTime : new Date());
-        const meetingEndTime = endTime ? new Date(endTime) : new Date();
-        const calculatedDuration = duration || Math.round((meetingEndTime - startTime) / (1000 * 60));
-
-        console.log(`Participant ended meeting. Final name: "${actualMeetingName}", Duration: ${calculatedDuration} minutes`);
-
-        const activity = new MeetingActivity({
-          userId: userId,
-          meetingName: actualMeetingName,
-          meetingId: meetingId,
-          status: 'completed',
-          duration: calculatedDuration,
-          participantCount: socket.meetingData ? socket.meetingData.participantCount : 1,
-          startTime: startTime,
-          endTime: meetingEndTime,
-          isHost: false // User is ending as participant, not host
-        });
-
-        await activity.save();
-        
-        // Emit to user's socket for real-time updates
-        io.to(`user_${userId}`).emit('activity-updated', {
-          type: 'meeting-completed',
-          activity: {
-            id: activity._id,
-            meetingName: actualMeetingName,
-            status: activity.status,
-            duration: activity.duration,
-            participantCount: activity.participantCount,
-            isHost: activity.isHost,
-            createdAt: activity.createdAt
-          }
-        });
-
-        console.log(`Participant end activity saved: ${actualMeetingName} (${calculatedDuration} minutes)`);
-        
-        // Clear meeting data
-        socket.meetingData = null;
-        
-      } catch (error) {
-        console.error('Error saving participant meeting end activity:', error);
       }
     });
 

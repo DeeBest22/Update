@@ -184,6 +184,14 @@ class Meeting {
     this.coHosts.delete(socketId);
     this.screenShares.delete(socketId);
     this.raisedHands.delete(socketId);
+    
+    // Emit event for activity tracking
+    socket.emit('participant-joined-meeting', {
+      meetingId: meetingId,
+      meetingName: meeting.name,
+      userId: socket.userId || socket.id, // Use actual user ID if available
+      isHost: false
+    });
     this.connectionAttempts.delete(socketId);
     this.connectionStates.delete(socketId);
     
@@ -1415,6 +1423,15 @@ socket.on('join-meeting', async (data) => {
         socket.emit('action-error', { message: 'Insufficient permissions' });
         return;
       }
+        
+        // Emit participant left event for activity tracking
+        socket.emit('participant-left-meeting', {
+          meetingId: meetingId,
+          userId: socket.userId || socket.id,
+          finalMeetingName: meeting.name,
+          leaveTime: new Date().toISOString()
+        });
+        
 
       const targetParticipant = meeting.participants.get(targetSocketId);
       if (targetParticipant) {
