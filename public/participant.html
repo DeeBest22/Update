@@ -38,6 +38,7 @@
     <script src="js/Chat/chatt.js" defer></script>
     <link rel="stylesheet" href="styles/textEdit.css">
     <link rel="stylesheet" href="styles/chat.css">
+    <script src="js/participantMeetingTracker.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
@@ -164,6 +165,37 @@
           <button class="control-btn end-call-btn">
             <i class="fas fa-phone-slash"></i>
           </button>
+          
+          <script>
+            // Enhanced end call functionality for participants
+            document.addEventListener('DOMContentLoaded', () => {
+              const endCallBtn = document.querySelector('.end-call-btn');
+              if (endCallBtn) {
+                endCallBtn.addEventListener('click', async () => {
+                  // Confirm exit
+                  const confirmed = confirm('Are you sure you want to leave this meeting?');
+                  if (!confirmed) return;
+                  
+                  // Handle meeting exit through tracker
+                  if (window.participantMeetingTracker) {
+                    await window.participantMeetingTracker.exitMeeting();
+                  } else {
+                    // Fallback exit
+                    window.location.href = '/dashboard';
+                  }
+                });
+              }
+            });
+          </script>
+          
+          <script>
+            // Initialize participant meeting tracking
+            let participantMeetingTracker = null;
+            
+            document.addEventListener('DOMContentLoaded', () => {
+              participantMeetingTracker = new ParticipantMeetingTracker();
+            });
+          </script>
              <button class="control-btn" id="actionToggle">
              
             <i class="fas fa-ellipsis-h"></i>
