@@ -71,6 +71,9 @@ export const setupChat = (app, io) => {
         users[socket.id] = newName.trim();
         io.emit('updateUsers', users);
         console.log(`Chat name updated for ${socket.id}: ${newName}`);
+        
+        // Emit specific name update event to the user
+        socket.emit('nameUpdated', { newName: newName.trim() });
       }
     });
 
