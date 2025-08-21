@@ -144,9 +144,9 @@ body {
   font-weight: 500;
   color: #f1f5f9;
   margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
 }
 
 .participant-role {

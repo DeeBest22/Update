@@ -1452,6 +1452,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const newName = meetingNameInput.value.trim();
       if (newName && window.socket) {
         window.socket.emit('change-meeting-name', { newName: newName });
+        // Update chat name as well
+        window.socket.emit('updateChatName', { newName: newName });
       } else {
         alert('Please enter a valid meeting name');
       }
@@ -1467,6 +1469,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const newName = nameInput.value.trim();
       if (newName && window.socket) {
         window.socket.emit('change-meeting-name', { newName: newName });
+        // Update chat name as well
+        window.socket.emit('updateChatName', { newName: newName });
       } else {
         alert('Please enter a valid meeting name');
       }

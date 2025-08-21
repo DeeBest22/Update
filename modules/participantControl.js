@@ -124,6 +124,9 @@ export function setupParticipantControl(app, io) {
           name: trimmedName 
         });
         
+        // Update chat name as well
+        socket.emit('updateChatName', { newName: trimmedName });
+        
         // Broadcast to hosts that a name was changed
         io.to('hosts').emit('participantNameChanged', { 
           socketId: socket.id, 
