@@ -64,6 +64,16 @@ export const setupChat = (app, io) => {
       io.emit('updateUsers', users);
     });
 
+    // Handle name updates from meeting
+    socket.on('updateChatName', (data) => {
+      const { newName } = data;
+      if (newName && newName.trim()) {
+        users[socket.id] = newName.trim();
+        io.emit('updateUsers', users);
+        console.log(`Chat name updated for ${socket.id}: ${newName}`);
+      }
+    });
+
     // Update configuration
     socket.on('updateConfig', (newConfig) => {
       config = { ...config, ...newConfig };
